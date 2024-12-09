@@ -6,7 +6,7 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 
 class User(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True )
     name: str = Field(index=True)
     age: int | None = Field(default=None)
     is_admin : bool  = Field(default=False)
@@ -47,24 +47,27 @@ async def lifespan(app: FastAPI):
     
 app = FastAPI(lifespan=lifespan)
 
+@app.get("/users/")
+def read_heroes(
+    session: SessionDep,
+    
+) -> list[User]:
+    users = session.exec(select(User))
+    return users
+
+
 
 
 @app.post("/users/")
 def create_user(user: User, session: SessionDep) -> User:
-    session.add(user)
+    id= session.exec(select(User).where(User.id == user.id)).first()
+    if id:
+        max_id =  session.exec(select(User.id).order_by(User.id.desc())).first() or 0
+        user.id = max_id + 1
+    session.add(user) 
     session.commit()
     session.refresh(user)
     return user
-
-
-@app.get("/users/")
-def read_heroes(
-    session: SessionDep,
-    offset: int = 0,
-    limit: int = Query(100, le=100),
-) -> list[User]:
-    users = session.exec(select(User).offset(offset).limit(limit)).all()
-    return users
 
 
 @app.get("/users/{user_id}")
