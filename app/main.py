@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated , Optional
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, Query
@@ -7,9 +7,18 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True )
-    name: str = Field(index=True)
+    username: str = Field(index=True)
     age: int | None = Field(default=None)
     is_admin : bool  = Field(default=False)
+    
+    
+class UserCreate(SQLModel):
+    username : str
+    is_admin : Optional[bool] =False
+    
+class UserOut(SQLModel):
+    username : str
+    is_admin : bool
     
 
 
@@ -29,6 +38,22 @@ def get_session():
         yield session
 
 
+def create_user(session: Session, user_data: UserCreate):
+    # Check if the username already exists using the 'User' model
+    user = session.exec(select(User).where(User.username == user_data.username)).first()
+    if user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
+    # Create a new user using the User model
+    new_user = User(username=user_data.username, is_admin=user_data.is_admin)
+    
+    # Add the new user to the database
+    session.add(new_user)
+    session.commit()
+    session.refresh(new_user)
+    
+    return new_user
+  
 
 SessionDep = Annotated[Session , Depends(get_session)]
 
@@ -47,10 +72,16 @@ async def lifespan(app: FastAPI):
     
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/users/")
-def read_heroes(
+@app.post("/users/" , response_model=UserOut)
+def add_user(user : UserCreate , session : Session = Depends(get_session)):
+    new_user =create_user ( session , user )
+    return new_user
+
+
+
+@app.get("/user/")
+def read_users(
     session: SessionDep,
-    
 ) -> list[User]:
     users = session.exec(select(User))
     return users
@@ -58,7 +89,7 @@ def read_heroes(
 
 
 
-@app.post("/users/")
+@app.post("/users2/")
 def create_user(user: User, session: SessionDep) -> User:
     id= session.exec(select(User).where(User.id == user.id)).first()
     if id:
@@ -86,3 +117,6 @@ def delete_hero(user_id: int, session: SessionDep):
     session.delete(user)
     session.commit()
     return {"ok": True}
+
+
+
