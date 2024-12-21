@@ -1,27 +1,30 @@
-from typing import Annotated , Optional
+from typing import Annotated, Optional
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 
+# Database Models
 class User(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True )
+    id: int | None = Field(default=None, primary_key=True)
     username: str = Field(index=True)
     age: int | None = Field(default=None)
-    is_admin : bool  = Field(default=False)
-    
-    
+    is_admin: bool = Field(default=False)
+
+
+# Pydantic Models for Validation and Response
 class UserCreate(SQLModel):
-    username : str
-    is_admin : Optional[bool] =False
-    
+    username: str
+    is_admin: Optional[bool] = False
+
+
 class UserOut(SQLModel):
-    username : str
-    is_admin : bool
-    
+    username: str
+    is_admin: bool
 
 
+# Database Configuration
 db_file = "database.db"
 sqlite_url = f"sqlite:///{db_file}"
 
@@ -38,64 +41,56 @@ def get_session():
         yield session
 
 
-def create_user(session: Session, user_data: UserCreate):
-    # Check if the username already exists using the 'User' model
+# Helper Function to Create User
+def create_user_in_db(session: Session, user_data: UserCreate) -> User:
+    # Check if the username already exists
     user = session.exec(select(User).where(User.username == user_data.username)).first()
     if user:
-        raise HTTPException(status_code=400, detail="Username already exists")
-    
-    # Create a new user using the User model
+        raise HTTPException(status_code=404, detail="Username already exists")
+
+    # Create a new user
     new_user = User(username=user_data.username, is_admin=user_data.is_admin)
-    
-    # Add the new user to the database
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
-    
     return new_user
-  
-
-SessionDep = Annotated[Session , Depends(get_session)]
 
 
+SessionDep = Annotated[Session, Depends(get_session)]
 
-app = FastAPI()
 
-
+# FastAPI Application
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # الكود الذي يتم تشغيله عند بدء التطبيق
-    create_db()
-    yield  # هنا يبدأ التطبيق في استقبال الطلبات
-    # الكود الذي يتم تشغيله عند إيقاف التطبيق (إذا كنت بحاجة إلى أي تنظيف)
+    create_db()  # Initialize database on startup
+    yield
     print("Application is shutting down...")
-    
+
+
 app = FastAPI(lifespan=lifespan)
 
-@app.post("/users/" , response_model=UserOut)
-def add_user(user : UserCreate , session : Session = Depends(get_session)):
-    new_user =create_user ( session , user )
+
+# Route Handlers
+@app.post("/users/", response_model=UserOut)
+def add_user(user: UserCreate, session: SessionDep):
+    new_user = create_user_in_db(session, user)
     return new_user
 
 
-
-@app.get("/user/")
-def read_users(
-    session: SessionDep,
-) -> list[User]:
-    users = session.exec(select(User))
+@app.get("/user/", response_model=list[UserOut])
+def read_users(session: SessionDep):
+    users = session.exec(select(User)).all()
     return users
 
 
-
-
 @app.post("/users2/")
-def create_user(user: User, session: SessionDep) -> User:
-    id= session.exec(select(User).where(User.id == user.id)).first()
-    if id:
-        max_id =  session.exec(select(User.id).order_by(User.id.desc())).first() or 0
+def create_user_with_id(user: User, session: SessionDep) -> User:
+    existing_user = session.exec(select(User).where(User.id == user.id)).first()
+    if existing_user:
+        max_id = session.exec(select(User.id).order_by(User.id.desc())).first() or 0
         user.id = max_id + 1
-    session.add(user) 
+
+    session.add(user)
     session.commit()
     session.refresh(user)
     return user
@@ -110,13 +105,11 @@ def read_user(user_id: int, session: SessionDep) -> User:
 
 
 @app.delete("/users/{user_id}")
-def delete_hero(user_id: int, session: SessionDep):
-    user = session.get(User , user_id)
+def delete_user(user_id: int, session: SessionDep):
+    user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
     session.delete(user)
     session.commit()
     return {"ok": True}
-
-
-
