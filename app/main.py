@@ -11,7 +11,7 @@ class User(SQLModel, table=True):
     username: str = Field(index=True)
     age: int | None = Field(default=None)
     is_admin: bool = Field(default=False)
-
+    
 
 # Pydantic Models for Validation and Response
 class UserCreate(SQLModel):
@@ -70,9 +70,6 @@ def create_event_in_db (session: Session , new_event: Event)-> Event :
     max_id =session.exec(select(Event.id).order_by(Event.id.desc())).first() or 0
     new_id = max_id + 1
     new_event.id = new_id
-    
-    
-    
     event = session.exec(select(Event).where(Event.name == new_event.name)).first() 
     if event:
         raise HTTPException(status_code=404, detail="Event already exists")
@@ -81,6 +78,13 @@ def create_event_in_db (session: Session , new_event: Event)-> Event :
     session.refresh(new_event)
     return new_event
         
+def vote (session : Session , event: Event , user: User ):
+    if event.id in user.voted_events:
+        raise HTTPException(status_code=404, detail="You already voted for this event")
+    user.voted_events.append(event.id)
+    session.commit()
+    return user
+    
 
 
 
@@ -144,4 +148,8 @@ def delete_user(user_id: int, session: SessionDep):
 def create_event( session: SessionDep  , new_event : Event):
     new_event = create_event_in_db (session , new_event)
     return new_event
-    
+
+@app.post("/vote" )
+def vote( session: SessionDep , vote :Event):
+    new_vote =vote(session, vote)
+    return new_vote
