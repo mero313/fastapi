@@ -23,6 +23,11 @@ class UserOut(SQLModel):
     username: str
     is_admin: bool
 
+class Event (SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(index=True)
+    counter: int | None = Field(default=None)
+
 
 # Database Configuration
 db_file = "database.db"
@@ -57,6 +62,26 @@ def create_user_in_db(session: Session, user_data: UserCreate) -> User:
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+def create_event_in_db (session: Session , new_event: Event)-> Event :
+    id = session.exec(select(Event).where(Event.id == new_event.id)).first()
+    if id:
+        raise HTTPException(status_code=404, detail="Event already exists")
+    max_id =session.exec(select(Event.id).order_by(Event.id.desc())).first() or 0
+    new_id = max_id + 1
+    new_event.id = new_id
+    
+    
+    
+    event = session.exec(select(Event).where(Event.name == new_event.name)).first() 
+    if event:
+        raise HTTPException(status_code=404, detail="Event already exists")
+    session.add(new_event)
+    session.commit()
+    session.refresh(new_event)
+    return new_event
+        
+
 
 
 # FastAPI Application
@@ -113,3 +138,10 @@ def delete_user(user_id: int, session: SessionDep):
     session.delete(user)
     session.commit()
     return {"ok": True}
+
+
+@app.post("/events/")
+def create_event( session: SessionDep  , new_event : Event):
+    new_event = create_event_in_db (session , new_event)
+    return new_event
+    
