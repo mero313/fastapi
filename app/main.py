@@ -1,8 +1,8 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional , List
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from sqlmodel import Field, Session, SQLModel, create_engine, select , Relationship
 
 
 # Database Models
@@ -11,6 +11,9 @@ class User(SQLModel, table=True):
     username: str = Field(index=True)
     age: int | None = Field(default=None)
     is_admin: bool = Field(default=False)
+    votes: List["Vote"] = Relationship(back_populates="user")
+
+
     
 
 # Pydantic Models for Validation and Response
@@ -26,7 +29,17 @@ class UserOut(SQLModel):
 class Event (SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True)
-    counter: int | None = Field(default=None)
+    total_points: int | None = Field(default=0)
+    votes: List["Vote"] = Relationship(back_populates="event")
+
+class Vote(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    event_id: int = Field(foreign_key="event.id")
+    points: int = Field(default=1)  # عدد النقاط الممنوحة
+    user: User = Relationship(back_populates="votes")
+    event: Event = Relationship(back_populates="votes")
+
 
 
 # Database Configuration
@@ -78,13 +91,36 @@ def create_event_in_db (session: Session , new_event: Event)-> Event :
     session.refresh(new_event)
     return new_event
         
-def vote (session : Session , event: Event , user: User ):
-    if event.id in user.voted_events:
-        raise HTTPException(status_code=404, detail="You already voted for this event")
-    user.voted_events.append(event.id)
-    session.commit()
-    return user
+def vote_to_event (session : Session , event_id: int , user_id: int):
+    event = session.get (Event, event_id)
+    user = session.get (User, user_id)
+    print(event_id)
+    print(user_id)
     
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    if not user :
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    already_vote = session.exec(
+        select(Vote).where(Vote.event_id == event.id , Vote.user_id ==user_id)).first()
+    
+    
+    
+    if already_vote:
+        raise HTTPException(status_code=404, detail="User already voted")
+    
+    points = 5 if user.is_admin else 1
+    
+    new_vote = Vote(event_id=event.id, user_id=user_id, points=points)
+    
+    event.total_points += points
+    
+    session.add(new_vote)
+    session.commit()
+    session.refresh(event)
+    return {"message": "Vote added successfully", "total_points": event.total_points}
 
 
 
@@ -149,7 +185,7 @@ def create_event( session: SessionDep  , new_event : Event):
     new_event = create_event_in_db (session , new_event)
     return new_event
 
-@app.post("/vote" )
-def vote( session: SessionDep , vote :Event):
-    new_vote =vote(session, vote)
+@app.post("/events/{event_id}/vote")
+def vote( session: SessionDep, event_id : int , user_id: int ):
+    new_vote =vote_to_event(session,  event_id,  user_id)
     return new_vote
