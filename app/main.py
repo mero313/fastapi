@@ -244,4 +244,7 @@ def log_in( session: SessionDep, user_id : int , username : str):
     is_admin = chek_admin( session , username)
     return {"is_admin": is_admin}
 
+@app.get("/log_in")
+    pass
+
 
