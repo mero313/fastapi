@@ -1,0 +1,18 @@
+<!-- votingsystem/templates/votingsystem/item_list.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>project List</title>
+</head>
+<body>
+    <h1>project List</h1>
+    <ul>
+      
+    <h3>{{ projects.title }}</h3>
+    <h3>{{ projects.counter }}</h3>
+   <h3>{{ projects.desc }}</h3>
+
+   <a href="{% url 'vote' id=vote.project_id %}">Vote</a>
+
+</body>
+</html>

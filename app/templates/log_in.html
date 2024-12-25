@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>computiq - Log In</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='login.css') }}">
+</head>
+<body>
+
+<div class="login-page flex lg:flex-row flex-col justify-between items-center lg:pt-20 lg:pl-20 ">
+    <img src="{{ url_for('static', path='images/login.svg') }}" alt="login_img" class="login-img">
+
+    <div class="lg:pr-36 flex flex-col items-center lg:ml-10 mb-10 ">
+        <a class="flex flex-row items-center lg:mx-36 " href="{{ url_for('index') }}"> <!-- link to the index page -->
+            <img src="{{ url_for('static', path='images/logo-part1.svg') }}" alt="logo" class="logo1">
+            <img src="{{ url_for('static', path='images/logo-part2.svg') }}" alt="logo" class="logo2 px-1">
+        </a>
+        <span class="line"></span>
+
+        <form action="{{ url_for('login') }}" method="POST" class="pt-4 flex flex-col items-center ">
+            <!-- CSRF is handled by FastAPI or omitted for simplicity -->
+            <input type="text" placeholder="Enter Your Username" name="username" class="in py-2 pl-2 lg:w-96 w-12/12 focus:outline-blue-500">
+            <input type="password" placeholder="Enter Your Password" name="password" class="in py-2 pl-2 lg:w-96 w-12/12 mt-4 focus:outline-blue-500">
+            <input type="submit" value="Log in" class="mt-4 font-bold login-btn">
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

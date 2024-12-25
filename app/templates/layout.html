@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Tailwind -->
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" rel="stylesheet"> <!--Google Fonts -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> <!-- Box icons -->
+
+    {% block head %}
+
+    {% endblock %}
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to left, #3a8dfa, #c8d9ee);
+            color: white;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            padding: 10px 20px;
+            z-index: 100;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: inherit;
+            transition: color 0.3s;
+        }
+
+        .navbar a:hover {
+            color: black;
+        }
+
+        .logo1{
+            height: 20px;
+        }
+        .logo2{
+            height: 50px;
+        }
+        .nav-item{
+            font-weight: 600;
+        }
+       
+        /* footer */
+        footer{
+            background: linear-gradient(to left, #3a8dfa, #c8d9ee);
+        }
+        .icon{
+            border: 1px solid black;
+            border-radius: 9999px;
+            padding-left: 2.5px;
+            padding-right: 2.5px;
+            padding-top: 2.5px;
+            padding-bottom: 2.5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <!-- Logo -->
+        <a class="flex flex-row items-center mx-36" href="">
+            <img src="{{ url_for('static', path='images/logo-part1.svg') }}" alt="logo" class="logo1">
+            <img src="{{ url_for('static', path='images/logo-part2.svg') }}" alt="logo" class="logo2 px-1">
+        </a>
+    
+        <div class="mx-64">
+            <ul class="ml-auto flex">
+                <li class="nav-item mx-3"> <a class="nav-link" href="/" data-scroll-nav="0">Home</a> </li>
+                <li class="nav-item mx-3"> <a class="nav-link" href="results" data-scroll-nav="1">Results</a> </li>
+                <li class="nav-item mx-3"> <a class="nav-link" href="/log_in" data-scroll-nav="2">Log in</a> </li>
+                <li class="nav-item mx-3"> <a class="nav-link" href="#" data-scroll-nav="3">Log out</a> </li>
+            </ul>
+        </div>
+    </div>
+
+
+  {% block body %}
+
+  {% endblock %}
+
+
+  <footer class="flex flex-row justify-center items-center">
+
+        <div class="py-4 px-52">
+            <p>ADDRESS</p>
+            <P>BAGHDAD, KARADHA</P><br>
+
+            <P>E-MAIL</P>
+            <P>COMPUTIQ@GAMIL.COM</P><br>
+
+            <P>WORKING HOURS</P>
+            <P>SUN-FRI 10:00 AM TO 9:00 PM</P><br>
+
+            
+            <P class="">SOCIAL MEDIA</P>
+            <span>
+                <a href="https://www.facebook.com/Computiq/" target="_blank"><i class='bx bxl-facebook    hover:bg-black hover:text-white icon'></i></a>
+                <a href="https://www.instagram.com/computiq" target="_blank"><i class='bx bxl-instagram    mx-1  hover:bg-black hover:text-white icon' ></i></a>
+                <a href="https://www.linkedin.com/company/computiq" target="_blank"><i class='bx bxl-linkedin    mx-0.5  hover:bg-black hover:text-white icon' ></i></a>
+            </span>
+
+        </div>
+        
+        <div class="py-8 px-56">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3334.1800914036867!2d44.42018707559235!3d33.314106973443785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x155781b86529e38b%3A0x8c933a2bac9a334!2sComputiq!5e0!3m2!1sen!2siq!4v1694896798316!5m2!1sen!2siq"
+             class="h-60 w-96 rounded-lg" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+
+  </footer>
+    
+
+</body>
+</html>

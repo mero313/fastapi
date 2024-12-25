@@ -1,0 +1,23 @@
+<!-- votingsystem/templates/votingsystem/item_list.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event List</title>
+</head>
+<body>
+    <h1>Event List</h1>
+    <ul>
+        {% for event in events %}
+        
+            <li>
+                {{ event.title }}
+               
+                <a href="{% url 'project' id=event.project_id %}">open</a>
+            </li>
+            
+        {% endfor %}
+
+        
+    </ul>
+</body>
+</html>

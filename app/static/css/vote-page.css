@@ -1,0 +1,32 @@
+
+    .line {
+	height: 2px;
+	width: 55px;
+	background: #3a8dfa;
+	display: block;
+	margin: 20px auto 20px;
+    position: relative;
+}
+.line::after {
+	content:"";
+	position: absolute;
+	left: 50%;
+	width: 150px;
+	height: 2px;
+	border-bottom: 2px dashed #3a8dfa;
+	margin-left: -75px;
+}
+.vote-btn{
+    border: 3px solid #3a8dfa;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 6px;
+    color: #3a8dfa;
+}
+.vote-btn:hover{
+    background-color: #3a8dfa ;
+    color: white;
+    transition: 0.4s;
+}

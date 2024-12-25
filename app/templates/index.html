@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link href="{{ url_for('static', path='css/index.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+
+<!-- about our system -->
+<div class="first-section flex flex-row items-center relative">
+    <div class="description w-5/12 mx-40">
+        <h1 class="text-4xl font-bold text-white py-8">Best Way To Vote!</h1>
+        <p class="text-white font-medium">
+            Goodbye to the old voting methods and Google Form,
+            Now you can vote for the team you choose in any competition through our
+            official website. Having an audience account will give the team you choose a
+            point, while the judges will give them 10 points!
+        </p>
+    </div>
+
+    <div class="w-5/12 voiting-photo">
+        <img src="{{ url_for('static', path='images/voiting.svg') }}" alt="voiting">
+    </div>
+    <span class="svg-wave absolute bottom-0 left-0">
+        <img src="{{ url_for('static', path='images/wave.svg') }}">
+    </span>
+</div>
+
+<!-- competition section -->
+<div class="competition-section my-16">
+    <div class="flex justify-center items-center flex-col">
+         <p class="text-3xl font-bold text-black">Our Competitions</p>
+         <span class="line"></span>
+     </div>
+
+    <!-- CARDS : -->
+    <div class="flex flex-row flex-wrap justify-center align-items my-1">
+        <!-- Cards container -->
+        <!-- Loop through the competitions from the backend -->
+        {% for competition in competitions %}
+        <a href="#">
+            <div class="bg-white h-64 w-80 rounded-xl border-2 border-slate-200 drop-shadow-xl mx-4 my-4">
+                <img src="{{ competition.image }}" alt="img" class="p-2.5 rounded-t-3xl"> <!-- Fetch img from backend -->
+                <p class="text-center py-3 text-2xl font-bold">{{ competition.name }}</p> <!-- Fetch name from backend -->
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- our team -->
+<div class="my-16"> 
+    <div class="flex justify-center items-center flex-col">
+        <p class="text-3xl font-bold text-black">Our Team</p>
+        <span class="line"></span>
+    </div>
+
+    <div class="text-center my-10">
+        <div class="flex justify-center items-center flex-row">
+
+            {% for team_member in team %}
+            <div class="team-detail px-16">
+                <img src="{{ team_member.image }}" class="mx-auto w-60 h-60 rounded-full" />
+                <h4>{{ team_member.name }}</h4>
+                <p>{{ team_member.role }}</p>
+            </div>
+            {% endfor %}
+          
+        </div>
+    </div>
+</div>
+
+{% endblock %}
