@@ -1,10 +1,11 @@
 from typing import Annotated, Optional , List 
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Depends, FastAPI, HTTPException , Request
+from fastapi import Depends, FastAPI, HTTPException , Request 
 from sqlmodel import Field, Session, SQLModel, create_engine, select , Relationship
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+
 
 
 # Database Models
@@ -32,6 +33,10 @@ class Event (SQLModel, table=True):
     name: str = Field(index=True)
     total_points: int | None = Field(default=0)
     votes: List["Vote"] = Relationship(back_populates="event")
+    
+    
+class creatEvent (SQLModel):
+    name: str
 
 class Vote(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -79,16 +84,23 @@ def create_user_in_db(session: Session, user_data: UserCreate) -> User:
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
-def create_event_in_db (session: Session , new_event: Event)-> Event :
-    id = session.exec(select(Event).where(Event.id == new_event.id)).first()
-    if id:
-        raise HTTPException(status_code=404, detail="Event already exists")
-    max_id =session.exec(select(Event.id).order_by(Event.id.desc())).first() or 0
-    new_id = max_id + 1
-    new_event.id = new_id
+def create_event_in_db (session: Session , new_event: creatEvent)-> Event :
+    #id = session.exec(select(Event).where(Event.id == new_event.id)).first()
+    #if id:
+    #    raise HTTPException(status_code=404, detail="Event already exists")
+    #max_id =session.exec(select(Event.id).order_by(Event.id.desc())).first() or 0
+    #new_id = max_id + 1    
+    #new_event.id = new_id
+    
     event = session.exec(select(Event).where(Event.name == new_event.name)).first() 
     if event:
         raise HTTPException(status_code=404, detail="Event already exists")
+    
+    max_id =session.exec(select(Event.id).order_by(Event.id.desc())).first() or 0
+    new_id = max_id + 1
+    
+    
+    new_event = Event(id = new_id , name= new_event.name)    
     session.add(new_event)
     session.commit()
     session.refresh(new_event)
@@ -128,9 +140,9 @@ def vote_to_event (session : Session , event_id: int , user_id: int):
 
 
 def chek_admin(session: Session, username: str) -> bool:
-    is_admin = session.exec(select(User.is_admin).where(User.username == username)).scalar()
+    is_admin = session.exec(select(User.is_admin).where(User.username == username)).first()
     if is_admin is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="admin not found")
     return is_admin
 
 
@@ -162,38 +174,30 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 # Configure templates
 templates = Jinja2Templates(directory="app/templates")
 
-@app.get("/")
-def home(request: Request  ,  session: SessionDep):
-    # Example data for rendering
-    competitions = [
-        {"name": "Competition 1", "image": "https://i.ytimg.com/vi/Lp7TQjWcqRM/maxresdefault.jpg"},
-        {"name": "Competition 2", "image": "https://i.ytimg.com/vi/Lp7TQjWcqRM/maxresdefault.jpg"},
-    ]
-    team = [
-        {"name": "Hussein Luay", "role": "Frontend Developer", "image": "https://cdn.80.lv/api/upload/content/42/images/6319adf16e04e/widen_1840x0.jpg"},
-        {"name": "Ameer Mazin", "role": "Backend Developer", "image": "https://cdn.80.lv/api/upload/content/91/images/6319ae09022f0/widen_920x0.jpg"},
-        {"name": "Elaf Abid", "role": "Backend Developer", "image": "https://www.denofgeek.com/wp-content/uploads/2022/07/Milly-Alcot-as-Rhaenyra-in-House-of-the-Dragon.jpeg"},
-    ]
-    return templates.TemplateResponse("index.html", {"request": request, "competitions": competitions, "team": team})
 
 
 
 
+origins = [
+    "http://localhost:5173",
+]
 
-##Allow all origins or specify the frontend URL
-#app.add_middleware(
-#    CORSMiddleware,
-#    allow_origins=["*"],  # Allow all origins or specify frontend URL
-#    allow_credentials=True,
-#    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-#    allow_headers=["*"],  # Allow all headers
-#)
+
+
+#Allow all origins or specify the frontend URL
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origins],  # Allow all origins or specify frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 
 
 # Route Handlers
 @app.post("/users/" , response_model=UserOut)
-def add_user(user: UserCreate, session: SessionDep  , request: Request):
+def add_user(user: UserCreate, session: SessionDep ):
     new_user = create_user_in_db(session, user)
     return new_user
 
@@ -219,14 +223,19 @@ def delete_user(user_id: int, session: SessionDep):
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
+    
+    
+    votes = session.exec(select(Vote).where(Vote.user_id == user_id)).all()
+    if votes:
+        for vote in votes:
+            session.delete(vote)
     session.delete(user)
     session.commit()
     return {"ok": True}
 
 
 @app.post("/events/")
-def create_event( session: SessionDep  , new_event : Event):
+def create_event( session: SessionDep  , new_event :creatEvent):
     new_event = create_event_in_db (session , new_event)
     return new_event
 
@@ -235,16 +244,32 @@ def vote( session: SessionDep, event_id : int , user_id: int ):
     new_vote =vote_to_event(session,  event_id,  user_id)
     return new_vote
 
+@app.delete("/events/{event_id}")
+def event(event_id: int, session: SessionDep):
+    
+    event = session.get(Event, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    votes = session.exec(select(Vote).where(Vote.event_id == event.id)).all()
+    if votes:
+        for vote in votes:
+            session.delete(vote)
+            
+    print(vote)
+    session.delete(event)
+    session.commit()
+    return {"ok": True}
+
+
 
 @app.post("/log_in")
-def log_in( session: SessionDep, user_id : int , username : str):
-    user = session.get(User, user_id)
+def log_in( session: SessionDep,  username : str):
+    user = session.exec(select(User).where(User.username == username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     is_admin = chek_admin( session , username)
     return {"is_admin": is_admin}
 
-@app.get("/log_in")
-    pass
 
 

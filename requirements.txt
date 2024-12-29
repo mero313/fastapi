@@ -9,3 +9,6 @@ httpx
 python-dotenv
 loguru
 orjson
+# npm create vite@latest frontend --template react
+
+# npm install axios
