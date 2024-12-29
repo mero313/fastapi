@@ -1,10 +1,31 @@
 import React from 'react';
+import { useEffect,useState } from 'react';
+import axios from 'axios';
+import api from "../api"
 // import './login.css';
 
 import login1 from "../assets/logo-part1.svg"
 import login2 from "../assets/logo-part2.svg"
+import "./login.css"
 
-const LoginPage = () => (
+const LoginPage = () =>{
+  
+  const [userName,setUserName] = useState(" iam working ")
+
+  useEffect(()=>{
+    const sendRequest = async () => {
+      try {
+        const response = await axios.post("https://localhost:5173/login", { username: userName });
+        console.log('Response:', response.data);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    sendRequest();
+  },[])
+
+  return (
   <div className="login-page flex lg:flex-row flex-col justify-between items-center lg:pt-20 lg:pl-20">
     {/* <img src={require('./images/login.svg')} alt="login_img" className="login-img" /> */}
 
@@ -37,6 +58,6 @@ const LoginPage = () => (
       </form>
     </div>
   </div>
-);
+);}
 
 export default LoginPage;

@@ -180,6 +180,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 origins = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173"
 ]
 
 
@@ -187,7 +188,7 @@ origins = [
 #Allow all origins or specify the frontend URL
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origins],  # Allow all origins or specify frontend URL
+    allow_origins=origins,  # Allow all origins or specify frontend URL
     allow_credentials=True,
     allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
     allow_headers=["*"],  # Allow all headers
@@ -270,6 +271,16 @@ def log_in( session: SessionDep,  username : str):
         raise HTTPException(status_code=404, detail="User not found")
     is_admin = chek_admin( session , username)
     return {"is_admin": is_admin}
+
+
+@app.put("/update")
+def update( session: SessionDep,  username : str,  new_username : str):
+    user = session.exec(select(User).where(User.username == username)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.username = new_username
+    session.commit()
+    return {"ok": True}
 
 
 

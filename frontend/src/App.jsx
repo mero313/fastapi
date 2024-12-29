@@ -1,18 +1,18 @@
-import { useState } from 'react'
-import LoginPage from './compounts/LoginPage' 
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import './App.css';
+import FruitList from './components/Fruits';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
   return (
-    <>
-      <LoginPage/>
-      
-    </>
-  )
-}
+    <div className="App">
+      <header className="App-header">
+        <h1>Fruit Management App</h1>
+      </header>
+      <main>
+        <FruitList />
+      </main>
+    </div>
+  );
+};
 
-export default App
+export default App;
