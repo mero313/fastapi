@@ -272,15 +272,7 @@ def log_in( session: SessionDep,  username : str):
     is_admin = chek_admin( session , username)
     return {"is_admin": is_admin}
 
-
-@app.put("/update")
-def update( session: SessionDep,  username : str,  new_username : str):
-    user = session.exec(select(User).where(User.username == username)).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    user.username = new_username
-    session.commit()
-    return {"ok": True}
-
+@app.get("/log_in")
+    pass
 
 
