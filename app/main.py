@@ -235,10 +235,16 @@ def delete_user(user_id: int, session: SessionDep):
     return {"ok": True}
 
 
-@app.post("/events/")
+@app.post("/event/")
 def create_event( session: SessionDep  , new_event :creatEvent):
     new_event = create_event_in_db (session , new_event)
     return new_event
+
+
+@app.get("/events")
+def get_events(session: SessionDep):
+    events = session.exec(select(Event)).all()
+    return events
 
 @app.post("/events/{event_id}/vote")
 def vote( session: SessionDep, event_id : int , user_id: int ):
@@ -272,7 +278,15 @@ def log_in( session: SessionDep,  username : str):
     is_admin = chek_admin( session , username)
     return {"is_admin": is_admin}
 
-@app.get("/log_in")
-    pass
+
+@app.put("/update")
+def update( session: SessionDep,  username : str,  new_username : str):
+    user = session.exec(select(User).where(User.username == username)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.username = new_username
+    session.commit()
+    return {"ok": True}
+
 
 
