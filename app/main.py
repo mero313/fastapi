@@ -275,8 +275,9 @@ def log_in( session: SessionDep,  username : str):
     user = session.exec(select(User).where(User.username == username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    userid = session .exec(select(User.id).where(User.username == username)).first()
     is_admin = chek_admin( session , username)
-    return {"is_admin": is_admin}
+    return {"is_admin": is_admin , "user_id": userid}
 
 
 @app.put("/update")

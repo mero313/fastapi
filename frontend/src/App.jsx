@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import FruitList from './components/Fruits';
-import Events from "./components/Events"
+import Container from './components/Container';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const App = () => {
@@ -28,7 +28,7 @@ const App = () => {
               <FruitList />
               </>
               } />
-            <Route path="/event" element={<Events/>} />
+            <Route path="/event" element={<Container/>  } />
           </Routes>
         </Router>
       </main>
@@ -37,3 +37,19 @@ const App = () => {
 };
 
 export default App;
+
+// import React, { useState } from 'react';
+// import VotingPage from './components/VotingPage';
+
+// const App = () => {
+//   const [user, setUser] = useState({ id: 2, isAdmin: true }); // Example user
+
+//   return (
+//     <div className="App">
+//       <h1>Welcome, {user.isAdmin ? 'Admin' : 'User'}</h1>
+//       <VotingPage userId={user.id} />
+//     </div>
+//   );
+// };
+
+// export default App;
