@@ -16,9 +16,9 @@ const FruitList = () => {
     }
   };
 
-  const addFruit = async (fruitName) => {
+  const addFruit = async (fruitName,isAdmin) => {
     try {
-      await api.post('/users', { username: fruitName });
+      await api.post('/users', { username: fruitName ,is_admin:isAdmin});
       fetchFruits();  // Refresh the list after adding a fruit
     } catch (error) {
       console.error("Error adding fruit", error);

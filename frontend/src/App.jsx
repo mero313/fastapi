@@ -3,6 +3,7 @@ import './App.css';
 import FruitList from './components/Fruits';
 import Container from './components/Container';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import CreateEvent from './components/CreateEvent';
 
 const App = () => {
   return (
@@ -17,18 +18,22 @@ const App = () => {
               <a href="/">Users</a>
             </li>
             <li>
-              <a href="/event">event</a>
+              <a href="/events">Events</a>
+            </li>
+            <li>
+              <a href="/create_event"> Create Event</a>
             </li>
           </ul>
         </nav>
         <Router>
           <Routes>
             <Route path="/" element={<>
-              <h1>Fruit Management App</h1>
+              <h1>Events Management App</h1>
               <FruitList />
               </>
               } />
-            <Route path="/event" element={<Container/>  } />
+            <Route path="/events" element={<Container/>  } />
+            <Route path="/create_event" element= { <CreateEvent/>}/>
           </Routes>
         </Router>
       </main>

@@ -19,3 +19,9 @@ margin: 2rem;
 .container_head *{
     margin-bottom: 1rem;
 }
+
+.active{
+    background-color: green;
+    cursor: not-allowed;
+    color: white;
+}

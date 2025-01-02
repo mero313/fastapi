@@ -275,9 +275,20 @@ def log_in( session: SessionDep,  username : str):
     user = session.exec(select(User).where(User.username == username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    userid = session .exec(select(User.id).where(User.username == username)).first()
+    userid =user.id
+    print(userid)
+    user_events = session.exec(
+        select(Event.name)
+        .join(Vote, Event.id == Vote.event_id)  # Join Event with Vote
+        .where(Vote.user_id == userid)         # Filter by the user's ID
+    ).all()
+    print(user_events)
     is_admin = chek_admin( session , username)
-    return {"is_admin": is_admin , "user_id": userid}
+    return {"is_admin": is_admin , "user_id": userid  , "user_events" : user_events}
+
+@app.get("/log_out")
+def log_out():
+    return {"ok": True}
 
 
 @app.put("/update")
