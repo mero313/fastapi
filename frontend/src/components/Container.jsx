@@ -53,7 +53,8 @@ const Container = () => {
   };
   
 
-  const handelLogIn=(userName)=>{
+  const handelLogIn=(e)=>{
+    e.preventDefault();
     logIn(userName);
   }
   
@@ -79,14 +80,14 @@ const Container = () => {
           >{user.user_events.includes(event.name)?"Voted":"vote"}</button>
         </div>
       ))}
-    </div>):(<div>
+    </div>):(<form onSubmit={(e)=>handelLogIn(e)}>
       <input type="text" value={userName}
       onChange={(e)=>{setUserName(e.target.value)}}
       />
       {/* <h1>{userName}</h1> */}
-      <button onClick={()=>handelLogIn(userName)}>Log In</button>
+      <button type='submit'>Log In</button>
       {err?(<h1>{err}</h1>):""}
-    </div>)
+    </form>)
     }
       
     </>

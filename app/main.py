@@ -120,9 +120,6 @@ def vote_to_event (session : Session , event_id: int , user_id: int):
     
     already_vote = session.exec(
         select(Vote).where(Vote.event_id == event.id , Vote.user_id ==user_id)).first()
-    
-    
-    
     if already_vote:
         raise HTTPException(status_code=404, detail="User already voted")
     
@@ -197,13 +194,13 @@ app.add_middleware(
 
 
 # Route Handlers
-@app.post("/users/" , response_model=UserOut)
+@app.post("/user" , response_model=UserOut)
 def add_user(user: UserCreate, session: SessionDep ):
     new_user = create_user_in_db(session, user)
     return new_user
 
 
-@app.get("/user/", response_model=list[UserOut])
+@app.get("/users", response_model=list[UserOut])
 def read_users(session: SessionDep):
     users = session.exec(select(User)).all()
     return users
@@ -211,25 +208,40 @@ def read_users(session: SessionDep):
 
 
 
-@app.get("/users/{user_id}")
-def read_user(user_id: int, session: SessionDep) -> User:
-    user = session.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+# @app.get("/users/{user_id}")
+# def read_user(user_id: int, session: SessionDep) -> User:
+#     user = session.get(User, user_id)
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return user
 
 
-@app.delete("/users/{user_id}")
-def delete_user(user_id: int, session: SessionDep):
-    user = session.get(User, user_id)
+# @app.delete("/users/{user_id}")
+# def delete_user(user_id: int, session: SessionDep  ):
+#     user = session.get(User, user_id)
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+    
+    
+#     votes = session.exec(select(Vote).where(Vote.user_id == user_id)).all()
+#     if votes:
+#         for vote in votes:
+#             session.delete(vote)
+#     session.delete(user)
+#     session.commit()
+#     return {"ok": True}
+
+@app.delete("/users/{username}")
+def delete_user( session: SessionDep , username : str):
+    user = session.exec(select(User).where(User.username == username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    votes = session.exec(select(Vote).where(Vote.user_id == user.id)).all()
     
-    votes = session.exec(select(Vote).where(Vote.user_id == user_id)).all()
-    if votes:
-        for vote in votes:
-            session.delete(vote)
+    for vote in votes:
+        session.delete(vote)
+            
     session.delete(user)
     session.commit()
     return {"ok": True}

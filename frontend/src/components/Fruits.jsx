@@ -8,7 +8,7 @@ const FruitList = () => {
 
   const fetchFruits = async () => {
     try {
-      const response = await api.get('/user/');
+      const response = await api.get('/users/');
       setFruits(response.data);
       // console.log(response.data)
     } catch (error) {
@@ -18,16 +18,16 @@ const FruitList = () => {
 
   const addFruit = async (fruitName,isAdmin) => {
     try {
-      await api.post('/users', { username: fruitName ,is_admin:isAdmin});
+      await api.post('/user', { username: fruitName ,is_admin:isAdmin});
       fetchFruits();  // Refresh the list after adding a fruit
     } catch (error) {
       console.error("Error adding fruit", error);
     }
   };
 
-  const DeleteUser = async(id)=>{
+  const DeleteUser = async(username)=>{
     try {
-      await api.delete(`/users/${id}`);
+      await api.delete(`/users/${username}`);
       fetchFruits();  // Refresh the list after adding a fruit
     } catch (error) {
       console.error("Error adding fruit", error);
