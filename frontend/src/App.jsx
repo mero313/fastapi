@@ -25,6 +25,7 @@ const App = () => {
             </li>
           </ul>
         </nav>
+        <h1>hi</h1>
         <Router>
           <Routes>
             <Route path="/" element={<>
