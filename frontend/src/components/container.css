@@ -25,3 +25,17 @@ margin: 2rem;
     cursor: not-allowed;
     color: white;
 }
+
+.logout{
+    width: 6rem;
+    height: 2rem;
+    background-color: green;
+    position: absolute;
+    top: 6%;
+    right: 10%;
+    transition: 0.2s;
+}
+
+.logout:hover{
+    background-color: red;
+}

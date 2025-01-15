@@ -29,11 +29,18 @@ const Container = () => {
       console.log(res.data)
       setUser(res.data)
       setIsLoggedIn(true)
+      localStorage.setItem('user', JSON.stringify(res.data));
       // console.log(user)
     } catch (err) {
       console.log(err.response?.data?.detail || err.message);
       setError(err.response?.data?.detail || err.message);
     }
+  };
+
+  const logOut = () => {
+    setIsLoggedIn(false);
+    setUser(null);
+    localStorage.removeItem('user'); // Clear user data
   };
 
   const Vote = async (eventId,eventName) => {
@@ -60,11 +67,13 @@ const Container = () => {
   
 
   useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      setIsLoggedIn(true);
+    }
     fetchEvents();
-          console.log(user)
-
-  }, [user]);
-
+  }, [])
   return (
     <>
    {user ?<h1>Welcome {userName}</h1>:""}
@@ -80,6 +89,7 @@ const Container = () => {
           >{user.user_events.includes(event.name)?"Voted":"vote"}</button>
         </div>
       ))}
+      <button onClick={logOut} className='logout'>Log out</button>
     </div>):(<form onSubmit={(e)=>handelLogIn(e)}>
       <input type="text" value={userName}
       onChange={(e)=>{setUserName(e.target.value)}}
