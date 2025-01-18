@@ -2,18 +2,15 @@ import React, { useState } from 'react';
 
 const AddFruitForm = ({ addFruit }) => {
   const [fruitName, setFruitName] = useState('');
-  const [isAdmin,setIsAdmin]=useState(false)
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [password, setPassword] = useState(''); // New state for password
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (fruitName) {
-      addFruit(fruitName,isAdmin);
-      setFruitName('');
-    }
-  };
-
-  const handleCheckboxChange = (event) => {
-    setIsAdmin(event.target.checked);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    addFruit(fruitName, isAdmin, password);
+    setFruitName('');
+    setIsAdmin(false);
+    setPassword(''); // Clear password input after submitting
   };
 
   return (
@@ -22,13 +19,23 @@ const AddFruitForm = ({ addFruit }) => {
         type="text"
         value={fruitName}
         onChange={(e) => setFruitName(e.target.value)}
-        placeholder="Enter fruit name"
+        placeholder="Username"
+        required
       />
-      <br />
-      <label for="checkbox">Is admin</label>
-      <input type="checkbox" id='checkbox' onChange={handleCheckboxChange} />
-      <br />
-      <button type="submit">Add Fruit</button>
+      <input
+        type="checkbox"
+        checked={isAdmin}
+        onChange={(e) => setIsAdmin(e.target.checked)}
+      />
+      <label>Admin</label>
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+        required
+      />
+      <button type="submit">Add User</button>
     </form>
   );
 };

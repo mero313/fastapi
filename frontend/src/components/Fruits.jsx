@@ -16,23 +16,23 @@ const FruitList = () => {
     }
   };
 
-  const addFruit = async (fruitName,isAdmin) => {
+  const addFruit = async (fruitName, isAdmin, password) => {
     try {
-      await api.post('/user', { username: fruitName ,is_admin:isAdmin});
+      await api.post('/user', { username: fruitName, is_admin: isAdmin, password: password });
       fetchFruits();  // Refresh the list after adding a fruit
     } catch (error) {
       console.error("Error adding fruit", error);
     }
   };
 
-  const DeleteUser = async(username)=>{
+  const DeleteUser = async (username) => {
     try {
       await api.delete(`/users/${username}`);
       fetchFruits();  // Refresh the list after adding a fruit
     } catch (error) {
-      console.error("Error adding fruit", error);
+      console.error("Error deleting user", error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchFruits();
@@ -43,12 +43,11 @@ const FruitList = () => {
       <h2>Fruits List</h2>
       <ul>
         {fruits.map((user) => (
-          
           <li key={user.username}>{user.username}</li>
         ))}
       </ul>
       <AddFruitForm addFruit={addFruit} />
-      <DelteUser DeleteUser={DeleteUser}/>
+      <DelteUser DeleteUser={DeleteUser} />
     </div>
   );
 };

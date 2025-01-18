@@ -5,7 +5,8 @@ from fastapi import Depends, FastAPI, HTTPException , Request
 from sqlmodel import Field, Session, SQLModel, create_engine, select , Relationship
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from auth import create_access_token, verify_password, get_password_hash
 
 
 # Database Models
@@ -15,17 +16,20 @@ class User(SQLModel, table=True):
     age: int | None = Field(default=None)
     is_admin: bool = Field(default=False)
     votes: List["Vote"] = Relationship(back_populates="user")
+    hashed_password : str 
 
 
     
 # Pydantic Models for Validation and Response
 class UserCreate(SQLModel):
     username: str
+    password : str
     is_admin: Optional[bool] = False
 
 
 class UserOut(SQLModel):
     username: str
+    # password : str
     is_admin: bool
 
 class Event (SQLModel, table=True):
@@ -73,9 +77,10 @@ def create_user_in_db(session: Session, user_data: UserCreate) -> User:
     user = session.exec(select(User).where(User.username == user_data.username)).first()
     if user:
         raise HTTPException(status_code=404, detail="Username already exists")
-
+    
+    hashed_password = get_password_hash(user_data.password)
     # Create a new user
-    new_user = User(username=user_data.username, is_admin=user_data.is_admin)
+    new_user = User(username=user_data.username, is_admin=user_data.is_admin , hashed_password=hashed_password)
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
@@ -165,14 +170,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# Serve static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-# Configure templates
-templates = Jinja2Templates(directory="app/templates")
-
-
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 origins = [
