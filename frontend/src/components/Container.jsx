@@ -31,6 +31,7 @@ const Container = () => {
       setUser(res.data);
       setIsLoggedIn(true);
       localStorage.setItem('user', JSON.stringify(res.data));
+      localStorage.setItem('username', userName); // Store username as a separate item
     } catch (err) {
       console.log(err.response?.data?.detail || err.message);
       setError(err.response?.data?.detail || err.message);
@@ -43,16 +44,25 @@ const Container = () => {
     localStorage.removeItem('user'); // Clear user data
   };
 
+
+
   const Vote = async (eventId, eventName) => {
     try {
       const res = await api.post(`/events/${eventId}/vote`, null, {
         params: { user_id: user.user_id },
       });
-      setUser((prevUser) => ({
-        ...prevUser,
-        user_events: [...prevUser.user_events, eventName],
-      }));
+      setUser((prevUser) => {
+        const updatedUser = {
+          ...prevUser,
+          user_events: [...prevUser.user_events, eventName],
+        };
+  
+        // Save the updated user to localStorage
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return updatedUser;
+      });
       console.log('Vote successful:', res.data);
+      
     } catch (err) {
       console.error('Error voting:', err.response?.data?.detail || err.message);
     }
@@ -63,18 +73,28 @@ const Container = () => {
     logIn(userName, password); // Updated to include password
   };
 
+  useEffect(()=>{
+fetchEvents();
+console.log(user)
+  },[user])
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
+    const storedUsername = localStorage.getItem('username'); // Retrieve username
     if (storedUser) {
       setUser(JSON.parse(storedUser));
       setIsLoggedIn(true);
     }
+    if (storedUsername) {
+      setUserName(storedUsername); // Update username state
+    }
     fetchEvents();
   }, []);
+  
 
   return (
     <>
-      {user ? <h1>Welcome {user.username}</h1> : ''}
+      {user ? <h1>Welcome {userName}</h1> : ''}
       {isLoggedIn ? (
         <div className="container">
           {events.map((event) => (

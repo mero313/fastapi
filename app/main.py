@@ -281,10 +281,14 @@ def event(event_id: int, session: SessionDep):
 
 
 @app.post("/log_in")
-def log_in( session: SessionDep,  username : str):
+def log_in( session: SessionDep,  username : str  , password: str):
     user = session.exec(select(User).where(User.username == username)).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    if not user :
+        raise HTTPException(status_code=401, detail="Invalid username")
+    
+    if not verify_password(password ,  user.hashed_password   ):
+        raise HTTPException( status_code=401 , detail="pass error"  )         
+    
     userid =user.id
     print(userid)
     user_events = session.exec(
