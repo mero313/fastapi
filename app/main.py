@@ -6,67 +6,69 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select , Relations
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from auth import create_access_token, verify_password, get_password_hash
+from auth import *
+from db import *
+from config import *
 
 
 # Database Models
-class User(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    username: str = Field(index=True  ,  unique=True) 
-    age: int | None = Field(default=None)
-    is_admin: bool = Field(default=False)
-    votes: List["Vote"] = Relationship(back_populates="user")
-    hashed_password : str 
+# class User(SQLModel, table=True):
+#     id: int | None = Field(default=None, primary_key=True)
+#     username: str = Field(index=True  ,  unique=True) 
+#     age: int | None = Field(default=None)
+#     is_admin: bool = Field(default=False)
+#     votes: List["Vote"] = Relationship(back_populates="user")
+#     hashed_password : str 
 
 
     
-# Pydantic Models for Validation and Response
-class UserCreate(SQLModel):
-    username: str
-    password : str
-    is_admin: Optional[bool] = False
+# # Pydantic Models for Validation and Response
+# class UserCreate(SQLModel):
+#     username: str
+#     password : str
+#     is_admin: Optional[bool] = False
 
 
-class UserOut(SQLModel):
-    username: str
-    # password : str
-    is_admin: bool
+# class UserOut(SQLModel):
+#     username: str
+#     # password : str
+#     is_admin: bool
 
-class Event (SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    name: str = Field(index=True)
-    total_points: int | None = Field(default=0)
-    votes: List["Vote"] = Relationship(back_populates="event")
+# class Event (SQLModel, table=True):
+#     id: int | None = Field(default=None, primary_key=True)
+#     name: str = Field(index=True)
+#     total_points: int | None = Field(default=0)
+#     votes: List["Vote"] = Relationship(back_populates="event")
     
     
-class creatEvent (SQLModel):
-    name: str
+# class creatEvent (SQLModel):
+#     name: str
 
-class Vote(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id")
-    event_id: int = Field(foreign_key="event.id")
-    points: int = Field(default=1)  # عدد النقاط الممنوحة
-    user: User = Relationship(back_populates="votes")
-    event: Event = Relationship(back_populates="votes")
-
-
-
-# Database Configuration
-db_file = "database.db"
-sqlite_url = f"sqlite:///{db_file}"
-
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, connect_args=connect_args)
+# class Vote(SQLModel, table=True):
+#     id: int | None = Field(default=None, primary_key=True)
+#     user_id: int = Field(foreign_key="user.id")
+#     event_id: int = Field(foreign_key="event.id")
+#     points: int = Field(default=1)  # عدد النقاط الممنوحة
+#     user: User = Relationship(back_populates="votes")
+#     event: Event = Relationship(back_populates="votes")
 
 
-def create_db():
-    SQLModel.metadata.create_all(engine)
+
+# # Database Configuration
+# db_file = "database.db"
+# sqlite_url = f"sqlite:///{db_file}"
+
+# connect_args = {"check_same_thread": False}
+# engine = create_engine(sqlite_url, connect_args=connect_args)
 
 
-def get_session():
-    with Session(engine) as session:
-        yield session
+# def create_db():
+#     SQLModel.metadata.create_all(engine)
+
+
+# def get_session():
+#     with Session(engine) as session:
+#         yield session
 
 
 
@@ -75,8 +77,11 @@ def get_session():
 def create_user_in_db(session: Session, user_data: UserCreate) -> User:
     # Check if the username already exists
     user = session.exec(select(User).where(User.username == user_data.username)).first()
+    print(user) if user else print("user not found")
     if user:
+        print(user) if user else print("user not found")
         raise HTTPException(status_code=404, detail="Username already exists")
+    
     
     hashed_password = get_password_hash(user_data.password)
     # Create a new user
@@ -90,13 +95,6 @@ def create_user_in_db(session: Session, user_data: UserCreate) -> User:
 SessionDep = Annotated[Session, Depends(get_session)]
 
 def create_event_in_db (session: Session , new_event: creatEvent)-> Event :
-    #id = session.exec(select(Event).where(Event.id == new_event.id)).first()
-    #if id:
-    #    raise HTTPException(status_code=404, detail="Event already exists")
-    #max_id =session.exec(select(Event.id).order_by(Event.id.desc())).first() or 0
-    #new_id = max_id + 1    
-    #new_event.id = new_id
-    
     event = session.exec(select(Event).where(Event.name == new_event.name)).first() 
     if event:
         raise HTTPException(status_code=404, detail="Event already exists")
@@ -193,15 +191,19 @@ app.add_middleware(
 
 # Route Handlers
 @app.post("/user" , response_model=UserOut)
-def add_user(user: UserCreate, session: SessionDep ):
+async def add_user(user: UserCreate, session: SessionDep ):
     new_user = create_user_in_db(session, user)
     return new_user
 
 
 @app.get("/users", response_model=list[UserOut])
-def read_users(session: SessionDep):
+async def read_users(session: SessionDep):
     users = session.exec(select(User)).all()
     return users
+
+# @app.get("/users", )
+# async def read_users( token : str = Depends(oauth2_scheme )):
+#     return{"token": token}
 
 
 
@@ -230,7 +232,7 @@ def read_users(session: SessionDep):
 #     return {"ok": True}
 
 @app.delete("/users/{username}")
-def delete_user( session: SessionDep , username : str):
+async def delete_user( session: SessionDep , username : str):
     user = session.exec(select(User).where(User.username == username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -246,23 +248,23 @@ def delete_user( session: SessionDep , username : str):
 
 
 @app.post("/event/")
-def create_event( session: SessionDep  , new_event :creatEvent):
+async def create_event( session: SessionDep  , new_event :creatEvent):
     new_event = create_event_in_db (session , new_event)
     return new_event
 
 
 @app.get("/events")
-def get_events(session: SessionDep):
+async def get_events(session: SessionDep):
     events = session.exec(select(Event)).all()
     return events
 
 @app.post("/events/{event_id}/vote")
-def vote( session: SessionDep, event_id : int , user_id: int ):
+async def vote( session: SessionDep, event_id : int , user_id: int ):
     new_vote =vote_to_event(session,  event_id,  user_id)
     return new_vote
 
 @app.delete("/events/{event_id}")
-def event(event_id: int, session: SessionDep):
+async def event(event_id: int, session: SessionDep):
     
     event = session.get(Event, event_id)
     if not event:
@@ -281,7 +283,7 @@ def event(event_id: int, session: SessionDep):
 
 
 @app.post("/log_in")
-def log_in( session: SessionDep,  username : str  , password: str):
+async def log_in( session: SessionDep,  username : str  , password: str):
     user = session.exec(select(User).where(User.username == username)).first()
     if not user :
         raise HTTPException(status_code=401, detail="Invalid username")
@@ -301,12 +303,12 @@ def log_in( session: SessionDep,  username : str  , password: str):
     return {"is_admin": is_admin , "user_id": userid  , "user_events" : user_events}
 
 @app.get("/log_out")
-def log_out():
+async def log_out():
     return {"ok": True}
 
 
 @app.put("/update")
-def update( session: SessionDep,  username : str,  new_username : str):
+async def update( session: SessionDep,  username : str,  new_username : str):
     user = session.exec(select(User).where(User.username == username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
