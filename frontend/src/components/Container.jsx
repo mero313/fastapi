@@ -22,10 +22,11 @@ const Container = () => {
   };
 
   const logIn = async (userName, password) => { // Updated to include password
+    const Userlogin={username:userName , password:password}
     try {
-      const res = await api.post('log_in', null, {
-        params: { username: userName, password: password }, // Include password in request
-      });
+      const res = await api.post('log_in',  
+      Userlogin, // Include password in request
+      );
       console.log('this is login');
       console.log(res.data);
       setUser(res.data);

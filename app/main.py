@@ -283,12 +283,12 @@ async def event(event_id: int, session: SessionDep):
 
 
 @app.post("/log_in")
-async def log_in( session: SessionDep,  username : str  , password: str):
-    user = session.exec(select(User).where(User.username == username)).first()
+async def log_in( session: SessionDep, Userlogin: Userlogin):
+    user = session.exec(select(User).where(User.username == Userlogin.username)).first()
     if not user :
         raise HTTPException(status_code=401, detail="Invalid username")
     
-    if not verify_password(password ,  user.hashed_password   ):
+    if not verify_password(Userlogin.password ,  user.hashed_password   ):
         raise HTTPException( status_code=401 , detail="pass error"  )         
     
     userid =user.id
@@ -299,8 +299,8 @@ async def log_in( session: SessionDep,  username : str  , password: str):
         .where(Vote.user_id == userid)         # Filter by the user's ID
     ).all()
     print(user_events)
-    is_admin = chek_admin( session , username)
-    return {"is_admin": is_admin , "user_id": userid  , "user_events" : user_events}
+    is_admin = chek_admin( session , Userlogin.username)
+    return {"ok": True,"is_admin": is_admin , "user_id": userid  , "user_events" : user_events}
 
 @app.get("/log_out")
 async def log_out():

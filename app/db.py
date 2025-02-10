@@ -18,6 +18,12 @@ class UserCreate(SQLModel):
     username: str
     password : str
     is_admin: Optional[bool] = False
+  
+   
+class Userlogin(SQLModel):
+    username: str
+    password : str
+    
 
 
 class UserOut(SQLModel):
