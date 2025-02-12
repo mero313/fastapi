@@ -119,3 +119,12 @@ def delete_hero(user_id: int, session: SessionDep):
 
 
 
+@app.post("/token")
+def login(username: str, password: str):
+    if username == "admin" and password == "secret":
+        token = create_access_token({"sub": username})
+        return {"access_token": token, "token_type": "bearer"}
+    raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+

@@ -7,6 +7,8 @@ from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status 
 from db import *
 
+from jwt import PyJWTError
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -36,27 +38,38 @@ def decode_access_token(token: str):
     except JWTError:
         return None
     
-async def authenticate_user(username: str, password: str):
-    # Check if user exists in the database
-    user = UserCreate if UserCreate[username] == username else None
+async def authenticate_user(session: Session, Userlogin: Userlogin):
+    user = session.exec(select(User).where(User.username ==  Userlogin.username)).first()
     if not user:
-        return None  # User not found
-    # Verify the password
-    if not verify_password(password, User["hashed_password"]):
-        return None  # Password is incorrect
-    return user  # Authentication successful
+        return None
+    if not verify_password(Userlogin.password, user.hashed_password):
+        return None
+    return user
 
 def verify_token(token: str):
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+# def get_current_user(token: str = Depends(oauth2_scheme)):
+#     try:
+#         payload = verify_token(token)
+#         return payload  # Typically, you'd fetch user from DB here
+#     except:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Invalid token",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+
+def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)):
     try:
         payload = verify_token(token)
-        return payload  # Typically, you'd fetch user from DB here
+        username = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        user = session.exec(select(User).where(User.username == username)).first()
+        if user is None:
+            raise HTTPException(status_code=401, detail="User not found")
+        return user
     except:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
