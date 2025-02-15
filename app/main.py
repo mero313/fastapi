@@ -41,7 +41,7 @@ app.add_middleware(
 
 
 @app.get("/users", response_model=list[UserOut] )
-async def read_users(session: SessionDep ):
+async def read_users(session: SessionDep  ,  token: str = Depends(oauth2_scheme) ):
     users = session.exec(select(User)).all()
     return users
 
@@ -155,11 +155,11 @@ def protected_route(user: dict = Depends(get_current_user)):
 
 
 @app.post("/token")
-async def token( session: SessionDep, from_data:OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user (from_data.username , from_data.password , session)
+async def token(session: SessionDep, from_data:OAuth2PasswordRequestForm = Depends()):
+    user = await authenticate_user (session , from_data, )
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username or password") 
-    access_token = create_access_token({"sub": from_data.username})  # Store username in token
+    access_token = create_access_token({"sub": user.username})  # Store username in token
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/users/me")

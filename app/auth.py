@@ -25,9 +25,9 @@ def verify_password(plain_password, hashed_password):
 
 
 
-def create_access_token(data: dict):
+def create_access_token(data: dict , expires_delta: timedelta = timedelta(minutes=30)):
     to_encode = data.copy()
-    expire = datetime.utcnow()
+    expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -40,10 +40,10 @@ def decode_access_token(token: str):
     
 async def authenticate_user(session: Session, Userlogin: Userlogin):
     user = session.exec(select(User).where(User.username ==  Userlogin.username)).first()
-    if not user:
-        return None
+    if not user :
+        raise HTTPException(status_code=401, detail="Invalid username auth") 
     if not verify_password(Userlogin.password, user.hashed_password):
-        return None
+        raise HTTPException( status_code=401 , detail="pass error auth" )
     return user
 
 def verify_token(token: str):
@@ -61,7 +61,7 @@ def verify_token(token: str):
 #             headers={"WWW-Authenticate": "Bearer"},
 #         )
 
-def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)):
+def get_current_user( session: Session = Depends(get_session)  , token: str = Depends(oauth2_scheme) ):
     try:
         payload = verify_token(token)
         username = payload.get("sub")
