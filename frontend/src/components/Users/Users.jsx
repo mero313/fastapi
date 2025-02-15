@@ -3,29 +3,6 @@ import api from "../../api";
 import "./users.css";
 
 
-  
-const UsersList = [
-  {
-    id: 1,
-    userName: "Adam",
-    isAdmin: true,
-  },
-  {
-    id: 2,
-    userName: "mero",
-    isAdmin: false,
-  },
-  {
-    id: 3,
-    userName: "ali",
-    isAdmin: false,
-  },
-  {
-    id: 4,
-    userName: "omar",
-    isAdmin: false,
-  },
-];
 
 const Users = () => {
     const [fruits, setFruits] = useState([]);
