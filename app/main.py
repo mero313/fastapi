@@ -40,8 +40,8 @@ app.add_middleware(
 )
 
 
-@app.get("/users", response_model=list[UserOut])
-async def read_users(session: SessionDep):
+@app.get("/users", response_model=list[UserOut] )
+async def read_users(session: SessionDep ):
     users = session.exec(select(User)).all()
     return users
 

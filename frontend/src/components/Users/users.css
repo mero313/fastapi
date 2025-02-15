@@ -1,0 +1,81 @@
+.app__users {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .app__users__list {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    /* justify-content: center;
+    align-items: center; */
+  }
+  
+  .app__users h2 {
+    padding: 1rem 4rem;
+    margin: 1rem 1.5rem;
+    width: fit-content;
+    height: fit-content;
+    border: #40c1c5 0.3rem solid;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: 0.2s linear;
+  }
+  .app__users h2:hover {
+    border-color: #31d9df;
+    box-shadow: 0.7rem 0.8rem 1rem #2dbdc2;
+    margin-top: 0rem;
+    margin-left: 1rem;
+  }
+  
+  h2.admin {
+    background-color: #40c1c5;
+    color: white;
+  }
+  
+  h2.admin:hover {
+    background-color: #31d9df;
+  }
+  
+  .app__users__form {
+    margin-top: 2rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: #40c1c5 0.3rem solid;
+    border-radius: 2rem;
+    width: 35%;
+    color: white;
+    background-color: #242323;
+  }
+  
+  .app__users__form div {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .app__users__form div input {
+    padding: 0.2rem;
+    margin-left: 1rem;
+    border: #40c1c5 0.2rem solid;
+  }
+  
+  .app__users__form button {
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: #40c1c5;
+    transition: 0.15s linear;
+  }
+  .app__users__form button:hover {
+    background-color: #31d9df;
+  }
+  
