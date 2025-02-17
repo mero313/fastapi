@@ -41,4 +41,34 @@
     background-color: #40c1c5;
     transition: 0.15s linear;
   }
+  .nf {
+    display: none !important;
+    min-height: 14rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 10; /* Keeps it above the shadow */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Regular shadow for depth */
+  }
+
+  .active{
+    display: flex !important;
+  }
+  
+  /* Full-screen dark background */
+  .nf::before {
+    content: "";
+    position: fixed; /* Covers the whole screen */
+    top: -50;
+    left: -50;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: -1; /* Keeps it behind .nf */
+  }
+  
   

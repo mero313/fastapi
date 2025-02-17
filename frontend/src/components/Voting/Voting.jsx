@@ -153,7 +153,7 @@ const Voting = () => {
   const [events, setEvents] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState(""); // New state for password
+  const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
   const [err, setError] = useState("");
 

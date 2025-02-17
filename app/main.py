@@ -150,7 +150,7 @@ async def update( session: SessionDep,  username : str,  new_username : str):
 
 @app.get("/protected")
 def protected_route(user: dict = Depends(get_current_user)):
-    return {"message": f"Hello {user['username']}, you accessed a protected route!"}
+    return {"message": f"Hello {user.username}, you accessed a protected route!"}
 
 
 
