@@ -7,12 +7,8 @@ from fastapi import Depends, HTTPException, status
 def create_user_in_db(session: Session, user_data: UserCreate) -> User:
     # Check if the username already exists
     user = session.exec(select(User).where(User.username == user_data.username)).first()
-    print(user) if user else print("user not found")
     if user:
-        print(user) if user else print("user not found")
         raise HTTPException(status_code=404, detail="Username already exists")
-    
-    
     hashed_password = get_password_hash(user_data.password)
     # Create a new user
     new_user = User(username=user_data.username, is_admin=user_data.is_admin , hashed_password=hashed_password)
@@ -27,12 +23,9 @@ def create_event_in_db (session: Session , new_event: creatEvent)-> Event :
     event = session.exec(select(Event).where(Event.name == new_event.name)).first() 
     if event:
         raise HTTPException(status_code=404, detail="Event already exists")
-    
-    max_id =session.exec(select(Event.id).order_by(Event.id.desc())).first() or 0
-    new_id = max_id + 1
-    
-    
-    new_event = Event(id = new_id , name= new_event.name)    
+    # max_id =session.exec(select(Event.id).order_by(Event.id.desc())).first() or 0
+    # new_id = max_id + 1
+    new_event = Event(name= new_event.name)    
     session.add(new_event)
     session.commit()
     session.refresh(new_event)

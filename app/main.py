@@ -40,8 +40,10 @@ app.add_middleware(
 )
 
 
-@app.get("/users", response_model=list[UserOut] )
-async def read_users(session: SessionDep):
+@app.get("/users", response_model=list[UserOut])
+async def read_users(session: SessionDep, current_user: User = Depends(get_current_user)):
+    # if not current_user.is_admin:
+    #     raise HTTPException(status_code=403, detail="Access denied")
     users = session.exec(select(User)).all()
     return users
 
@@ -56,7 +58,9 @@ async def add_user(user: UserCreate, session: SessionDep ):
 
 
 @app.delete("/users/{username}")
-async def delete_user( session: SessionDep , username : str):
+async def delete_user( session: SessionDep,  username : str , current_user: User = Depends(get_current_user)):
+    if current_user.username == username:
+        raise HTTPException(status_code=400, detail="You cannot delete your own account")
     user = session.exec(select(User).where(User.username == username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -104,7 +108,7 @@ async def event(event_id: int, session: SessionDep):
         for vote in votes:
             session.delete(vote)
             
-    print(vote)
+    
     session.delete(event)
     session.commit()
     return {"ok": True}
@@ -112,7 +116,7 @@ async def event(event_id: int, session: SessionDep):
 
 
 @app.post("/log_in")
-async def log_in( session: SessionDep, Userlogin: Userlogin):
+async def log_in( session: SessionDep, Userlogin: Userlogin  ):
     user = session.exec(select(User).where(User.username == Userlogin.username)).first()
     if not user :
         raise HTTPException(status_code=401, detail="Invalid username")
@@ -149,10 +153,33 @@ async def update( session: SessionDep,  username : str,  new_username : str):
 
 
  
-# @app.get("/if_admin/{user_id}")
-# async def if_admin( session: SessionDep, user_id: int):
-#     user = session.exec(select(User).where(User.id == user_id)).first()
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     is_admin = chek_admin( session , user.username)
-#     return {"ok": True, "is_admin": is_admin}
+@app.get("/if_admin/{user_id}")
+async def if_admin( session: SessionDep, user_id: int):
+    user = session.exec(select(User).where(User.id == user_id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    is_admin = chek_admin( session , user.username)
+    return {"ok": True, "is_admin": is_admin}
+
+
+
+@app.post("/token")
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), 
+    db: Session = Depends(get_session)
+):
+    user = await authenticate_user(db, form_data)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=30)
+    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/users/me")
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return current_user

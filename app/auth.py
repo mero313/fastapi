@@ -38,16 +38,16 @@ def decode_access_token(token: str):
     except JWTError:
         return None
     
-async def authenticate_user(session: Session, Userlogin: Userlogin):
-    user = session.exec(select(User).where(User.username ==  Userlogin.username)).first()
+async def authenticate_user(session: Session, User_data: Userlogin):
+    user = session.exec(select(User).where(User.username ==  User_data.username)).first()
     if not user :
         raise HTTPException(status_code=401, detail="Invalid username auth") 
-    if not verify_password(Userlogin.password, user.hashed_password):
+    if not verify_password(User_data.password, user.hashed_password):
         raise HTTPException( status_code=401 , detail="pass error auth" )
     return user
 
 def verify_token(token: str):
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM] , options={"verify_signature": True})
 
 
 # def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -61,7 +61,7 @@ def verify_token(token: str):
 #             headers={"WWW-Authenticate": "Bearer"},
 #         )
 
-def get_current_user( session: Session = Depends(get_session)  , token: str = Depends(oauth2_scheme) ):
+def get_current_user(session: Session = Depends(get_session),token: str = Depends(oauth2_scheme) ):
     try:
         payload = verify_token(token)
         username = payload.get("sub")
