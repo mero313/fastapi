@@ -144,18 +144,29 @@
 
 // --------------------------------------------------------------
 
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
+import { AuthContext } from "../../hooks/context/ContextProvider";
 // import api from '../api'; // API calls are commented out
 
 import "./voting.css";
 
 const Voting = () => {
+  const {
+    logIn,
+    setUser,
+    user,
+    isLoggedIn,
+    setIsLoggedIn,
+    userName,
+    setUserName,
+    password,
+    setPassword,
+    logOut,
+  } = useContext(AuthContext);
   const [events, setEvents] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
   const [err, setError] = useState("");
+
+  console.log(user);
 
   // Dummy event data
   const dummyEvents = [
@@ -184,27 +195,6 @@ const Voting = () => {
     setEvents(dummyEvents);
   };
 
-  const logIn = async (userName, password) => {
-    // Commented out API call
-    // try {
-    //   const res = await api.post('log_in', { username: userName, password });
-    //   setUser(res.data);
-    //   setIsLoggedIn(true);
-    //   localStorage.setItem('user', JSON.stringify(res.data));
-    //   localStorage.setItem('username', userName);
-    // } catch (err) {
-    //   setError(err.response?.data?.detail || err.message);
-    // }
-    setUser(dummyUser);
-    setIsLoggedIn(true);
-  };
-
-  const logOut = () => {
-    setIsLoggedIn(false);
-    setUser(null);
-    localStorage.removeItem("user");
-  };
-
   const Vote = (eventId, eventName) => {
     // Simulate a vote being added
     setUser((prevUser) => {
@@ -224,7 +214,7 @@ const Voting = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -259,28 +249,10 @@ const Voting = () => {
               </button>
             </div>
           ))}
-          <button onClick={logOut} className="logout">
-            Log out
-          </button>
         </div>
       ) : (
-        <div className="form__container">
-          <form onSubmit={handleLogIn} className="log_in_form">
-            <input
-              type="text"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              placeholder="Enter username"
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
-            />
-            <button type="submit">Log In</button>
-            {err && <h1>{err}</h1>}
-          </form>
+        <div className="prelog">
+          <h2>You Should be logged in to access this page</h2>
         </div>
       )}
     </>

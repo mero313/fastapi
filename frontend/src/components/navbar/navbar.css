@@ -1,74 +1,82 @@
 .app__navbar {
-    background-color: #242323;
-    padding: 2rem;
-    position: relative;
-  }
-  
-  .app__navbar ul {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .app__navbar ul li {
-    margin: 0 2rem;
-    list-style: none;
-  }
-  
-  .app__navbar ul li a {
-    text-decoration: none;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: 700;
-    transition: 0.15s linear;
-  }
-  
-  .app__navbar ul li a:hover {
-    color: #40c1c5;
-  }
-  
-  .app__navbar button {
-    position: absolute;
-    right: 10%;
-    top: 20%;
-    padding: 1rem 2rem;
-    border-radius: 2rem;
-    cursor: pointer;
-    color: white;
-    font-size: 1rem;
-    font-weight: bold;
-    background-color: #40c1c5;
-    transition: 0.15s linear;
-  }
-  .nf {
-    display: none !important;
-    min-height: 14rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    z-index: 10; /* Keeps it above the shadow */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Regular shadow for depth */
-  }
+  background-color: #242323;
+  padding: 2rem;
+  position: relative;
+}
 
-  .active{
-    display: flex !important;
-  }
-  
-  /* Full-screen dark background */
-  .nf::before {
-    content: "";
-    position: fixed; /* Covers the whole screen */
-    top: -50;
-    left: -50;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
-    z-index: -1; /* Keeps it behind .nf */
-  }
-  
-  
+.app__navbar ul {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.app__navbar ul li {
+  margin: 0 2rem;
+  list-style: none;
+}
+
+.app__navbar ul li a {
+  text-decoration: none;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+  transition: 0.15s linear;
+}
+
+.app__navbar ul li a:hover {
+  color: #40c1c5;
+}
+
+.app__navbar button {
+  position: absolute;
+  right: 10%;
+  top: 20%;
+  padding: 1rem 2rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #40c1c5;
+  transition: 0.15s linear;
+}
+
+.form__container {
+  background-color: rgba(0, 0, 0, 0.3);
+  width: 100dvw;
+  height: 100dvh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  display: none !important;
+}
+.nf {
+  /* display: none !important;
+  min-height: 14rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 10px;*/
+  z-index: 10;
+}
+
+.activef {
+  display: flex !important;
+}
+
+/* Full-screen dark background */
+.nf::before {
+  content: "";
+  position: fixed; /* Covers the whole screen */
+  top: -50;
+  left: -50;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  z-index: -1; /* Keeps it behind .nf */
+}
