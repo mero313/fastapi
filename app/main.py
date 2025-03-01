@@ -41,7 +41,7 @@ app.add_middleware(
 
 
 @app.get("/users", response_model=list[UserOut] )
-async def read_users(session: SessionDep  ,  token: str = Depends(oauth2_scheme) ):
+async def read_users(session: SessionDep):
     users = session.exec(select(User)).all()
     return users
 
@@ -148,25 +148,11 @@ async def update( session: SessionDep,  username : str,  new_username : str):
     return {"ok": True}
 
 
-@app.get("/protected")
-def protected_route(user: dict = Depends(get_current_user)):
-    return {"message": f"Hello {user.username}, you accessed a protected route!"}
-
-
-
-@app.post("/token")
-async def token(session: SessionDep, from_data:OAuth2PasswordRequestForm = Depends()):
-    user = await authenticate_user (session , from_data, )
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid username or password") 
-    access_token = create_access_token({"sub": user.username})  # Store username in token
-    return {"access_token": access_token, "token_type": "bearer"}
-
-@app.get("/users/me")
-async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
-
-    
-    
-
-
+ 
+# @app.get("/if_admin/{user_id}")
+# async def if_admin( session: SessionDep, user_id: int):
+#     user = session.exec(select(User).where(User.id == user_id)).first()
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     is_admin = chek_admin( session , user.username)
+#     return {"ok": True, "is_admin": is_admin}
