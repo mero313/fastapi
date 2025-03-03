@@ -31,13 +31,13 @@ const Navbar = () => {
           {user ? "log out" : "log in"}
         </button>
       </nav>
-
       <div
-        className={`form__container ${openLogIn}`}
+        className={`background  ${openLogIn}`}
         onClick={() => {
           setOpenLogIn("");
         }}
-      >
+      ></div>
+      <div className={`form__container ${openLogIn}`}>
         <form onSubmit={logIn} className={`log_in_form nf `}>
           <input
             type="text"
