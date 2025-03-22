@@ -7,19 +7,20 @@ import Users from "./components/Users/Users";
 
 const App = () => {
   return (
-    <div>
-      <main>
-        <Navbar />
-        <Router>
+    <Router> 
+      <div>
+        <main>
+          <Navbar />
           <Routes>
             <Route path="/" element={<Users />} />
             <Route path="/events" element={<Voting />} />
             <Route path="/create_event" element={<AddEvent />} />
           </Routes>
-        </Router>
-      </main>
-    </div>
+        </main>
+      </div>
+    </Router>
   );
 };
 
 export default App;
+

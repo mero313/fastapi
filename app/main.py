@@ -40,8 +40,8 @@ app.add_middleware(
 )
 
 
-@app.get("/users", response_model=list[UserOut])
-async def read_users(session: SessionDep, current_user: User = Depends(get_current_user)):
+@app.get("/users", response_model=list[UserOut] )
+async def read_users(session: SessionDep , get_cur = Depends(get_current_user)):
     # if not current_user.is_admin:
     #     raise HTTPException(status_code=403, detail="Access denied")
     users = session.exec(select(User)).all()
@@ -58,9 +58,9 @@ async def add_user(user: UserCreate, session: SessionDep ):
 
 
 @app.delete("/users/{username}")
-async def delete_user( session: SessionDep,  username : str , current_user: User = Depends(get_current_user)):
-    if current_user.username == username:
-        raise HTTPException(status_code=400, detail="You cannot delete your own account")
+def delete_user( username : str , session: SessionDep):
+    # if current_user.username == username:
+    #     raise HTTPException(status_code=400, detail="You cannot delete your own account")
     user = session.exec(select(User).where(User.username == username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -78,10 +78,12 @@ async def delete_user( session: SessionDep,  username : str , current_user: User
 
 
 @app.get("/events")
-async def get_events(session: SessionDep):
+async def get_events(session: SessionDep, current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     events = session.exec(select(Event)).all()
     return events
-
 
 
 @app.post("/event/")
@@ -114,6 +116,7 @@ async def event(event_id: int, session: SessionDep):
     return {"ok": True}
 
 
+# get_cur = Depends(get_current_user)
 
 @app.post("/log_in")
 async def log_in( session: SessionDep, Userlogin: Userlogin  ):

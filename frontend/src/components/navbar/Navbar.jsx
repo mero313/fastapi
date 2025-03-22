@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import { Link } from 'react-router-dom';
 import { AuthContext } from "../../hooks/context/ContextProvider";
 
 import "./navbar.css";
@@ -14,31 +15,34 @@ const Navbar = () => {
       <nav className="app__navbar">
         <ul>
           <li>
-            <a href="/">Users</a>
+            <Link to="/">Users</Link>
           </li>
           <li>
-            <a href="/events">Events</a>
+            <Link to="/events">Events</Link>
           </li>
           <li>
-            <a href="/create_event"> Create Event</a>
+            <Link to="/create_event"> Create Event</Link>
           </li>
         </ul>
         <button
+
           onClick={() => {
-            setOpenLogIn("activef");
+            isLoggedIn?logOut():setOpenLogIn("activef");
+            
           }}
         >
           {user ? "log out" : "log in"}
         </button>
-      </nav>
-      <div
+      </nav><>
+      {isLoggedIn ?"": (<>
+        <div
         className={`background  ${openLogIn}`}
         onClick={() => {
           setOpenLogIn("");
         }}
       ></div>
       <div className={`form__container ${openLogIn}`}>
-        <form onSubmit={logIn} className={`log_in_form nf `}>
+      <form onSubmit={(e) => logIn(e, userName, password)} className="log_in_form nf">
           <input
             type="text"
             value={userName}
@@ -62,7 +66,8 @@ const Navbar = () => {
             cancel
           </button>
         </form>
-      </div>
+      </div></>)}
+      </>
     </>
   );
 };

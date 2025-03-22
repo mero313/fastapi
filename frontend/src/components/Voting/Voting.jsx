@@ -146,88 +146,103 @@
 
 import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../hooks/context/ContextProvider";
-// import api from '../api'; // API calls are commented out
+import api from "../../api";
 
 import "./voting.css";
 
 const Voting = () => {
   const {
     logIn,
-    setUser,
+    changeUserEventsHandler,
     user,
     isLoggedIn,
-    setIsLoggedIn,
     userName,
     setUserName,
-    password,
-    setPassword,
-    logOut,
+    token
   } = useContext(AuthContext);
   const [events, setEvents] = useState([]);
   const [err, setError] = useState("");
 
-  console.log(user);
 
-  // Dummy event data
-  const dummyEvents = [
-    { id: 1, name: "Event 1", total_points: 10 },
-    { id: 2, name: "Event 2", total_points: 20 },
-    { id: 3, name: "Event 3", total_points: 5 },
-    { id: 4, name: "Event 4", total_points: 5 },
-    { id: 5, name: "Event 5", total_points: 5 },
-  ];
+  // const dummyEvents = [
+  //   { id: 1, name: "Event 1", total_points: 10 },
+  //   { id: 2, name: "Event 2", total_points: 20 },
+  //   { id: 3, name: "Event 3", total_points: 5 },
+  //   { id: 4, name: "Event 4", total_points: 5 },
+  //   { id: 5, name: "Event 5", total_points: 5 },
+  // ];
 
-  // Dummy user data
-  const dummyUser = {
-    user_id: 1,
-    username: "testUser",
-    user_events: [],
-  };
+  // const dummyUser = {
+  //   user_id: 1,
+  //   username: "testUser",
+  //   user_events: [],
+  // };
 
   const fetchEvents = async () => {
-    // Commented out API call
-    // try {
-    //   const response = await api.get('/events');
-    //   setEvents(response.data);
-    // } catch (error) {
-    //   console.error('Error fetching events', error);
-    // }
-    setEvents(dummyEvents);
+    try {
+      const response = await api.get('/events', {
+        headers: {
+          Authorization: `Bearer ${token}`,  
+        },
+      });
+      setEvents(response.data);
+    } catch (error) {
+      console.error('Error fetching events', error);
+    }
   };
 
-  const Vote = (eventId, eventName) => {
-    // Simulate a vote being added
-    setUser((prevUser) => {
-      const updatedUser = {
-        ...prevUser,
-        user_events: [...prevUser.user_events, eventName],
-      };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      return updatedUser;
-    });
+  // const Vote = (eventId, eventName) => {
+  //   setUser((prevUser) => {
+  //     const updatedUser = {
+  //       ...prevUser,
+  //       user_events: [...prevUser.user_events, eventName],
+  //     };
+  //     localStorage.setItem("user", JSON.stringify(updatedUser));
+  //     return updatedUser;
+  //   });
+  // };
+  const Vote = async (eventId, eventName) => {
+    try {
+      const res = await api.post(`/events/${eventId}/vote`, null, {
+        params: { user_id: user.user_id },
+      });
+  
+      changeUserEventsHandler(eventName)
+  
+      console.log("Vote successful:", res.data);
+  
+      fetchEvents();
+      // setEvents((prevEvents) =>
+      //   prevEvents.map((event) =>
+      //     event.id === eventId ? { ...event, total_points: event.total_points + 1 } : event
+      //   )
+      // );
+  
+    } catch (err) {
+      console.error("Error voting:", err.response?.data?.detail || err.message);
+    }
   };
+  
+  useEffect(() => {
+    console.log(events)
+     }, [events]);
+   
 
-  const handleLogIn = (e) => {
-    e.preventDefault();
-    logIn(userName, password);
-  };
+  // const handleLogIn = (e) => {
+  //   e.preventDefault();
+  //   logIn(userName, password);
+  // };
+
+  
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedUsername = localStorage.getItem("username");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsLoggedIn(true);
-    }
-    if (storedUsername) {
-      setUserName(storedUsername);
-    }
+ useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [token]);
+
 
   return (
     <>

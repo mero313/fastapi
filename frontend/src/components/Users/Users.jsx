@@ -8,13 +8,16 @@ const Users = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  const { logIn, setUser, user, isLoggedIn, setIsLoggedIn, logOut } =
+  const { logIn, setUser, user, isLoggedIn, setIsLoggedIn, logOut ,token} =
     useContext(AuthContext);
 
   const fetchFruits = async () => {
     try {
-      const response = await api.get("/users/");
-      setFruits(response.data);
+      const response = await api.get("/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,  
+        },
+      });      setFruits(response.data);
       console.log(response.data);
     } catch (error) {
       console.error("Error fetching fruits", error);
@@ -42,18 +45,22 @@ const Users = () => {
     }
   };
 
-  //   const DeleteUser = async (username) => {
-  //     try {
-  //       await api.delete(`/users/${username}`);
-  //       fetchFruits();  // Refresh the list after adding a fruit
-  //     } catch (error) {
-  //       console.error("Error deleting user", error);
-  //     }
-  //   };
+    const DeleteUser = async (username) => {
+      try {
+        console.log(username)
+        await api.delete(`/users/${username}`);
+        fetchFruits();  // Refresh the list after adding a fruit
+      } catch (error) {
+        console.error("Error deleting user", error);
+      }
+    };
 
   useEffect(() => {
     fetchFruits();
   }, []);
+  useEffect(() => {
+    fetchFruits();
+  }, [token]);
 
   return (
     <div className="app__users">
@@ -61,7 +68,8 @@ const Users = () => {
         {fruits.map((user, i) => (
           <h2 key={i} className={`${user.is_admin ? "admin" : ""}`}>
             {user.username}
-          </h2>
+            <span className="deleteSpan" onClick={()=>{DeleteUser(user.username)}}>DELETE</span>
+            </h2>
         ))}
       </div>
       <>
