@@ -1,7 +1,7 @@
 from typing import Annotated, Optional , List 
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Depends, FastAPI, HTTPException , Request 
+from fastapi import Depends, FastAPI, HTTPException , Request , Header
 from sqlmodel import Field, Session, SQLModel, create_engine, select , Relationship
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -186,3 +186,41 @@ async def login_for_access_token(
 @app.get("/users/me")
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+# @app.post("/login_with_token")
+# def login_with_token(session : SessionDep, 
+#     token : str 
+#     ):
+#     payload = verify_token(token)
+#     print(payload["sub"])
+#     events_user = get_user_events( session ,payload["sub"] )
+#     # If token is valid, return user data (or other required information)
+#     return {"message": "Token is valid", "user": payload["sub"] , "events": events_user } 
+
+# @app.get("/login_with_token")
+# async def login_with_token(Authorization: str = Header(...)):
+#     token = Authorization.split(" ")[1]  # Extract token from Authorization header
+#     try:
+#         payload = verify_token(token)
+#         return {"message": "Token is valid", "user": payload["sub"]}
+#     except HTTPException as e:
+#         raise e
+
+@app.post("/login_with_token")
+def login_with_token(
+    session: Session = Depends(get_session),  # Assuming you have a session dependency
+    authorization: str = Header(None)  # Get token from the Authorization header
+):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=400, detail="Invalid or missing token")
+
+    token = authorization.split("Bearer ")[1]  # Extract token after "Bearer "
+    
+    payload = verify_token(token)  # Assuming this function verifies and decodes the token
+    events_user = get_user_events(session, payload["sub"])  
+
+    return {
+        "message": "Token is valid",
+        "user": payload["sub"],
+        "events": events_user
+    }

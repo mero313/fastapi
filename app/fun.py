@@ -68,4 +68,13 @@ def chek_admin(session: Session, username: str) -> bool:
         raise HTTPException(status_code=404, detail="admin not found")
     return is_admin
 
-
+def get_user_events (session: Session, username: str):
+    user_id = session.exec(select(User.id).where(User.username == username)).first()
+    user_events = session.exec(
+        select(Event.name)
+        .join(Vote, Event.id == Vote.event_id)  # Join Event with Vote
+        .where(Vote.user_id == user_id)         # Filter by the user's ID
+    ).all()
+    if not user_events:
+        raise HTTPException(status_code=404, detail="User has no events")
+    return user_events

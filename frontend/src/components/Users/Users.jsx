@@ -55,9 +55,9 @@ const Users = () => {
       }
     };
 
-  useEffect(() => {
-    fetchFruits();
-  }, []);
+  // useEffect(() => {
+  //   fetchFruits();
+  // }, []);
   useEffect(() => {
     fetchFruits();
   }, [token]);

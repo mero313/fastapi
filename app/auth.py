@@ -46,8 +46,20 @@ async def authenticate_user(session: Session, User_data: Userlogin):
         raise HTTPException( status_code=401 , detail="pass error auth" )
     return user
 
+# def verify_token(token: str):
+#     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM] , options={"verify_signature": True})
+
 def verify_token(token: str):
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM] , options={"verify_signature": True})
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload["exp"] < datetime.utcnow().timestamp():
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
+    except jwt.JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
 
 
 # def get_current_user(token: str = Depends(oauth2_scheme)):

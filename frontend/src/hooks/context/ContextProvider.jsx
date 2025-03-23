@@ -19,18 +19,57 @@ export const AuthProvider = ({ children }) => {
     const access_token = JSON.parse(localStorage.getItem("access_token"));
 
     if(access_token){
+      (async () => {
+        try {
+          const data =await logInWithToken(access_token);
+          console.log("this is it")
+          console.log(data)
+          setIsLoggedIn(True);
+          setUser(date)
+          return
+        } catch (error) {
+          if(storedUser){
+            if(!user){
+              console.log("no no no no")
+              await logIn(null, storedUser.username, storedUser.password);
+            }
+        
+          }
+        }
+      })();
       console.log('got it')
       setToken(access_token)
     }
     
-    if (storedUser) {
-      (async () => {
-        await logIn(null, storedUser.username, storedUser.password);
-      })();
-    }
+    
   }, []);
-  
+  useEffect(() => {
+    console.log('doing it')
 
+    logInWithToken(token)
+  }, [token]);
+  
+  const logInWithToken = async (access_token) => {
+    console.log("Trying to log in with token...");
+  
+    try {
+      const res = await api.post(
+        "/login_with_token",
+        {}, 
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        }
+      );
+  
+      console.log("Response:", res.data);
+      return res.data
+    } catch (error) {
+      console.error("Error logging in with token:", error.response?.data || error);
+    }
+  };
+  
   // Login Function
   const logIn = async (e, username, password) => {
     if(e){
