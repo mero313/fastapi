@@ -10,6 +10,7 @@ from auth import *
 from db import *
 from config import *
 from fun import *
+from jose import JWTError, jwt
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -128,13 +129,13 @@ async def log_in( session: SessionDep, Userlogin: Userlogin  ):
         raise HTTPException( status_code=401 , detail="pass error"  )         
     
     userid =user.id
-    print(userid)
+    # print(userid)
     user_events = session.exec(
         select(Event.name)
         .join(Vote, Event.id == Vote.event_id)  # Join Event with Vote
         .where(Vote.user_id == userid)         # Filter by the user's ID
     ).all()
-    print(user_events)
+    # print(user_events)
     is_admin = chek_admin( session , Userlogin.username)
     
     access_token = create_access_token({"sub": user.username})  # Store username in token
@@ -187,6 +188,8 @@ async def login_for_access_token(
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
+# endpoint if i need test this from sweeger 
+
 # @app.post("/login_with_token")
 # def login_with_token(session : SessionDep, 
 #     token : str 
@@ -197,27 +200,39 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
 #     # If token is valid, return user data (or other required information)
 #     return {"message": "Token is valid", "user": payload["sub"] , "events": events_user } 
 
-# @app.get("/login_with_token")
-# async def login_with_token(Authorization: str = Header(...)):
-#     token = Authorization.split(" ")[1]  # Extract token from Authorization header
-#     try:
-#         payload = verify_token(token)
-#         return {"message": "Token is valid", "user": payload["sub"]}
-#     except HTTPException as e:
-#         raise e
+
+# endpoint if i need test this from frontend
+# @app.post("/login_with_token")
+# def login_with_token(
+#     session: Session = Depends(get_session),  # Assuming you have a session dependency
+#     authorization: str = Header(None)  # Get token from the Authorization header
+# ):
+#     if not authorization or not authorization.startswith("Bearer "):
+#         raise HTTPException(status_code=400, detail="Invalid or missing token")
+
+#     token = authorization.split("Bearer ")[1]  # Extract token after "Bearer "
+    
+#     decoded =jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#     print(decoded)
+    
+#     payload = verify_token(token)  # Assuming this function verifies and decodes the token
+#     events_user = get_user_events(session, payload["sub"])  
+
+#     return {
+#         "message": "Token is valid",
+#         "user": payload["sub"],
+#         "events": events_user
+#     }
+
+# endpoint if i need test this from sweeger & frontend
 
 @app.post("/login_with_token")
 def login_with_token(
-    session: Session = Depends(get_session),  # Assuming you have a session dependency
-    authorization: str = Header(None)  # Get token from the Authorization header
+    session=Depends(get_session),
+    token: str = Depends(oauth2_scheme)  # This allows Swagger to send the token
 ):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=400, detail="Invalid or missing token")
-
-    token = authorization.split("Bearer ")[1]  # Extract token after "Bearer "
-    
-    payload = verify_token(token)  # Assuming this function verifies and decodes the token
-    events_user = get_user_events(session, payload["sub"])  
+    payload = verify_token(token)  # Decode token
+    events_user = get_user_events(session, payload["sub"])  # Get events for user
 
     return {
         "message": "Token is valid",

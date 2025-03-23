@@ -7,7 +7,8 @@ from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status 
 from db import *
 
-from jwt import PyJWTError
+
+
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
