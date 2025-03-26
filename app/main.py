@@ -224,8 +224,8 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
 #         "events": events_user
 #     }
 
-# endpoint if i need test this from sweeger & frontend
 
+# endpoint if i need test this from sweeger & frontend
 @app.post("/login_with_token")
 def login_with_token(
     session=Depends(get_session),
