@@ -21,12 +21,8 @@ export const AuthProvider = ({ children }) => {
     if(access_token){
       (async () => {
         try {
-          const data =await logInWithToken(access_token);
+          await logInWithToken(access_token);
           console.log("this is it")
-          console.log(data)
-          setIsLoggedIn(True);
-          setUser(date)
-          return
         } catch (error) {
           if(storedUser){
             if(!user){
@@ -43,11 +39,12 @@ export const AuthProvider = ({ children }) => {
     
     
   }, []);
-  useEffect(() => {
-    console.log('doing it')
 
-    logInWithToken(token)
-  }, [token]);
+  // useEffect(() => {
+  //   console.log('doing it')
+
+  //   logInWithToken(token)
+  // }, [token]);
   
   const logInWithToken = async (access_token) => {
     console.log("Trying to log in with token...");
@@ -64,7 +61,8 @@ export const AuthProvider = ({ children }) => {
       );
   
       console.log("Response:", res.data);
-      return res.data
+      setIsLoggedIn(true);
+      setUser(res.data)
     } catch (error) {
       console.error("Error logging in with token:", error.response?.data || error);
     }

@@ -232,10 +232,15 @@ def login_with_token(
     token: str = Depends(oauth2_scheme)  # This allows Swagger to send the token
 ):
     payload = verify_token(token)  # Decode token
+    userid =get_user_by_name(session , payload["sub"])
     events_user = get_user_events(session, payload["sub"])  # Get events for user
-
+    
+    
+    
+    
     return {
         "message": "Token is valid",
         "user": payload["sub"],
-        "events": events_user
+        "user_events": events_user ,
+        "user_id":userid
     }

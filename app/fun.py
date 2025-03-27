@@ -78,3 +78,12 @@ def get_user_events (session: Session, username: str):
     if not user_events:
         raise HTTPException(status_code=404, detail="User has no events")
     return user_events
+
+def get_user_by_name(
+    session: Session, username: str
+):
+    user = session.exec(select(User).where(User.username == username)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user.id
+    

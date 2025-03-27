@@ -206,7 +206,7 @@ const Voting = () => {
       const res = await api.post(`/events/${eventId}/vote`, null, {
         params: { user_id: user.user_id },
       });
-  
+      
       changeUserEventsHandler(eventName)
   
       console.log("Vote successful:", res.data);
