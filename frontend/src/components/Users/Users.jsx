@@ -48,10 +48,16 @@ const Users = () => {
     const DeleteUser = async (username) => {
       try {
         console.log(username)
-        await api.delete(`/users/${username}`);
+        await api.delete(`/users/${username}`,{
+          headers: {
+            Authorization: `Bearer ${token}`,  
+          },
+        });
+        
         fetchFruits();  // Refresh the list after adding a fruit
       } catch (error) {
         console.error("Error deleting user", error);
+        alert(error.response.data.detail);
       }
     };
 
